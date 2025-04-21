@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Attendance Tracker Sheet</title>
+    <!-- Link to Bootstrap CSS for styling -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Link to Google Fonts for custom typography -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* General body styles */
+      * {
+        font-family: "Montserrat", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: weight;
+        font-style: normal;
+      }
+
+      body {
+        font-family: "Poppins", Arial, sans-serif;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #333;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Full-page canvas effect */
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background-color: #000;
+      }
+
+      /* Styles for the jumbotron section */
+      .jumbotron {
+        color: white;
+        padding: 20px 0;
+        background: transparent;
+        position: relative;
+        z-index: 10;
+      }
+
+      .jumbotron h1 {
+        font-weight: 600;
+      }
+
+      /* Styles for the form */
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgb(118 118 118 / 50%);
+        padding: 30px;
+        border-radius: 10px;
+        background-color: rgb(79 79 79 / 60%);
+        box-shadow: 0 4px 8px rgb(0 0 0 / 15%);
+        position: relative;
+        z-index: 10;
+        backdrop-filter: blur(5px);
+        flex-basis: 30%;
+        height: 500px;
+      }
+
+      label {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: #c0bfbf;
+      }
+
+      input[type="date"] {
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid rgba(204, 204, 204, 0.8);
+        font-size: 16px;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      /* Button styles */
+      button[type="submit"] {
+        background-color: rgba(40, 167, 69, 0.9);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background-color 0.3s ease;
+      }
+
+      button[type="submit"]:hover {
+        background-color: rgba(33, 136, 56, 0.9);
+      }
+
+      /* Container for attendance data */
+      .container {
+        margin-top: 0px !important;
+        position: relative;
+        z-index: 10;
+        background-color: rgb(79 79 79 / 60%);
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid rgb(118 118 118 / 50%);
+        flex-basis: 70%;
+        height: 500px; /* Fixed height */
+        overflow-y: auto; /* Scroll effect */
+        overflow-y: hidden; /* Hide horizontal scrollbar */
+      }
+
+      /* Make only the table scrollable */
+      .scrollable-table {
+        height: calc(100% - 60px); /* Adjust height to allow space for header */
+        overflow-y: auto;
+      }
+
+      /* Flexbox container to place the form and content side by side */
+      .flex-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        position: relative;
+        z-index: 10;
+        margin-top: 40px;
+        padding: 0 20px;
+        height: 500px;
+      }
+
+      /* Header container for alignment */
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 10;
+      }
+
+      .header-container h2 {
+        margin: 0;
+        font-weight: 600;
+        color: aliceblue;
+      }
+
+      /* CSV button aligned to the right */
+      .btn-csv {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: right;
+        text-decoration: none;
+        position: relative;
+        z-index: 10;
+      }
+
+      .btn-csv:hover {
+        background-color: #0056b3;
+      }
+
+      /* Styles for the table */
+      table {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        border-collapse: collapse;
+        position: relative;
+        z-index: 10;
+      }
+
+      table th,
+      table td {
+        padding: 12px 15px !important;
+        text-align: left;
+        --bs-table-bg: transparent !important;
+      }
+
+      table th {
+        background-color: rgba(241, 243, 245, 0.8);
+        color: #333;
+        font-weight: bold;
+        --bs-table-bg: transparent !important;
+      }
+
+      table tr:nth-child(even) {
+        background-color: rgba(248, 249, 250, 0.6);
+        --bs-table-bg: transparent !important;
+      }
+
+      table tr:hover {
+        background-color: rgba(233, 236, 239, 0.6);
+        --bs-table-bg: transparent !important;
+      }
+
+      /* Loader styles */
+      .loader {
+        border: 8px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 8px solid #007bff;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        display: none;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Loader overlay styles */
+      .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Canvas for the animated effect -->
+    <canvas id="nokey">
+      Your Browser Don't Support Canvas, Please Download Chrome ^_^
+    </canvas>
+
+    <!-- Jumbotron section with Logout button -->
+    <div class="jumbotron d-flex justify-content-between align-items-center px-4">
+      <h1 class="display-4">Attendance Tracker Sheet</h1>
+      <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+
+    <!-- Flexbox container for form and attendance data -->
+    <div class="flex-container">
+      <!-- Form for selecting the date -->
+      <form action="/attendance" method="POST" id="attn-form">
+        <label for="selected_date">Select Date: </label>
+        <input type="date" id="selected_date" name="selected_date" required />
+        <button type="submit" class="btn btn-outline-success">
+          Show attendance
+        </button>
+      </form>
+
+      <!-- Container for attendance data and CSV download button -->
+      <div class="container mt-5 dim-content" id="content-container">
+        <div class="header-container">
+          <h2>Attendance Data Table for <br />{{ selected_date }}</h2>
+          <a
+            href="/download_csv?selected_date={{ selected_date }}"
+            class="btn-csv"
+            id="csv-button"
+            >Download CSV</a
+          >
+        </div>
+
+        <div class="scrollable-table">
+          <table class="table table-hover" id="attendance-table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Date</th>
+                <th scope="col">Time</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-tbody">
+              {% if no_data %}
+              <tr>
+                <td colspan="3" class="text-center">
+                  No data available for {{ selected_date }}
+                </td>
+              </tr>
+              {% else %}
+              {% for name, time in attendance_data %}
+              <tr>
+                <td>{{ name }}</td>
+                <td>{{ selected_date }}</td>
+                <td>{{ time }}</td>
+              </tr>
+              {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link to Bootstrap JavaScript for functionality -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- JavaScript for particle animation -->
+    <script>
+      var canvas = document.getElementById("nokey"),
+        can_w = parseInt(canvas.getAttribute("width")),
+        can_h = parseInt(canvas.getAttribute("height")),
+        ctx = canvas.getContext("2d");
+
+      var BALL_NUM = 50;
+
+      var ball = {
+          x: 0,
+          y: 0,
+          vx: 0,
+          vy: 0,
+          r: 0,
+          alpha: 1,
+          phase: 0,
+        },
+        ball_color = {
+          r: 207,
+          g: 255,
+          b: 4,
+        },
+        R = 2,
+        balls = [],
+        alpha_f = 0.03,
+        alpha_phase = 0,
+        // Line
+        link_line_width = 0.8,
+        dis_limit = 260,
+        add_mouse_point = true,
+        mouse_in = false,
+        mouse_ball = {
+          x: 0,
+          y: 0,
+          vx: 0,
+          vy: 0,
+          r: 0,
+          type: "mouse",
+        };
+
+      // Random speed
+      function getRandomSpeed(pos) {
+        var min = -1,
+          max = 1;
+        switch (pos) {
+          case "top":
+            return [randomNumFrom(min, max), randomNumFrom(0.1, max)];
+          case "right":
+            return [randomNumFrom(min, -0.1), randomNumFrom(min, max)];
+          case "bottom":
+            return [randomNumFrom(min, max), randomNumFrom(min, -0.1)];
+          case "left":
+            return [randomNumFrom(0.1, max), randomNumFrom(min, max)];
+          default:
+            return;
+        }
+      }
+
+      function randomArrayItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function randomNumFrom(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      // Random Ball
+      function getRandomBall() {
+        var pos = randomArrayItem(["top", "right", "bottom", "left"]);
+        switch (pos) {
+          case "top":
+            return {
+              x: randomSidePos(can_w),
+              y: -R,
+              vx: getRandomSpeed("top")[0],
+              vy: getRandomSpeed("top")[1],
+              r: R,
+              alpha: 1,
+              phase: randomNumFrom(0, 10),
+            };
+          case "right":
+            return {
+              x: can_w + R,
+              y: randomSidePos(can_h),
+              vx: getRandomSpeed("right")[0],
+              vy: getRandomSpeed("right")[1],
+              r: R,
+              alpha: 1,
+              phase: randomNumFrom(0, 10),
+            };
+          case "bottom":
+            return {
+              x: randomSidePos(can_w),
+              y: can_h + R,
+              vx: getRandomSpeed("bottom")[0],
+              vy: getRandomSpeed("bottom")[1],
+              r: R,
+              alpha: 1,
+              phase: randomNumFrom(0, 10),
+            };
+          case "left":
+            return {
+              x: -R,
+              y: randomSidePos(can_h),
+              vx: getRandomSpeed("left")[0],
+              vy: getRandomSpeed("left")[1],
+              r: R,
+              alpha: 1,
+              phase: randomNumFrom(0, 10),
+            };
+        }
+      }
+
+      function randomSidePos(length) {
+        return Math.ceil(Math.random() * length);
+      }
+
+      // Draw Ball
+      function renderBalls() {
+        balls.forEach(function (b) {
+          if (!b.hasOwnProperty("type")) {
+            ctx.fillStyle =
+              "rgba(" +
+              ball_color.r +
+              "," +
+              ball_color.g +
+              "," +
+              ball_color.b +
+              "," +
+              b.alpha +
+              ")";
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, R, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+          }
+        });
+      }
+
+      // Update balls
+      function updateBalls() {
+        var new_balls = [];
+        balls.forEach(function (b) {
+          b.x += b.vx;
+          b.y += b.vy;
+          if (b.x > -50 && b.x < can_w + 50 && b.y > -50 && b.y < can_h + 50) {
+            new_balls.push(b);
+          }
+          b.phase += alpha_f;
+          b.alpha = Math.abs(Math.cos(b.phase));
+        });
+        balls = new_balls.slice(0);
+      }
+
+      // Draw lines
+      function renderLines() {
+        for (var i = 0; i < balls.length; i++) {
+          for (var j = i + 1; j < balls.length; j++) {
+            var fraction = getDisOf(balls[i], balls[j]) / dis_limit;
+            if (fraction < 1) {
+              var alpha = (1 - fraction).toString();
+              ctx.strokeStyle = "rgba(150,150,150," + alpha + ")";
+              ctx.lineWidth = link_line_width;
+              ctx.beginPath();
+              ctx.moveTo(balls[i].x, balls[i].y);
+              ctx.lineTo(balls[j].x, balls[j].y);
+              ctx.stroke();
+              ctx.closePath();
+            }
+          }
+        }
+      }
+
+      // calculate distance between two points
+      function getDisOf(b1, b2) {
+        var delta_x = Math.abs(b1.x - b2.x),
+          delta_y = Math.abs(b1.y - b2.y);
+        return Math.sqrt(delta_x * delta_x + delta_y * delta_y);
+      }
+
+      // add balls if there are too few
+      function addBallIfy() {
+        if (balls.length < BALL_NUM) {
+          balls.push(getRandomBall());
+        }
+      }
+
+      // Render
+      function render() {
+        ctx.clearRect(0, 0, can_w, can_h);
+        renderBalls();
+        renderLines();
+        updateBalls();
+        addBallIfy();
+        window.requestAnimationFrame(render);
+      }
+
+      // Init Balls
+      function initBalls(num) {
+        for (var i = 1; i <= num; i++) {
+          balls.push({
+            x: randomSidePos(can_w),
+            y: randomSidePos(can_h),
+            vx: getRandomSpeed("top")[0],
+            vy: getRandomSpeed("top")[1],
+            r: R,
+            alpha: 1,
+            phase: randomNumFrom(0, 10),
+          });
+        }
+      }
+
+      // Init Canvas
+      function initCanvas() {
+        canvas.setAttribute("width", window.innerWidth);
+        canvas.setAttribute("height", window.innerHeight);
+        can_w = parseInt(canvas.getAttribute("width"));
+        can_h = parseInt(canvas.getAttribute("height"));
+      }
+
+      window.addEventListener("resize", function () {
+        initCanvas();
+      });
+
+      function goMovie() {
+        initCanvas();
+        initBalls(BALL_NUM);
+        window.requestAnimationFrame(render);
+      }
+      goMovie();
+
+      // Mouse effect
+      canvas.addEventListener("mouseenter", function () {
+        mouse_in = true;
+        balls.push(mouse_ball);
+      });
+
+      canvas.addEventListener("mouseleave", function () {
+        mouse_in = false;
+        balls = balls.filter(function (b) {
+          return !b.hasOwnProperty("type");
+        });
+      });
+
+      canvas.addEventListener("mousemove", function (e) {
+        mouse_ball.x = e.pageX;
+        mouse_ball.y = e.pageY;
+      });
+    </script>
+  </body>
+</html>
